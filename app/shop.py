@@ -21,9 +21,10 @@ class Shop:
             return getattr(self, item)
         raise KeyError(item)
 
-    def products_cost(self, customer: Customer) -> float:
+    def products_cost(self, customer: Customer) -> float | None:
         total = 0
-        for product, quanty in customer.product_cart.items():
-            price = self.products.get(product) * quanty
-            total += price
+        for product, quantity in customer.product_cart.items():
+            if product not in self.products:
+                return None
+            total += self.products[product] * quantity
         return total

@@ -23,22 +23,28 @@ shops_list = [
 def shop_trip() -> None:
     for customer in customers_list:
         print(f"{customer.name} has {customer.money} dollars")
+        available_shops = [
+            shop for shop in shops_list if shop.products_cost(customer) is not None
+        ]
+
         trip_costs = {
             shop: distance_cost(customer, shop) + shop.products_cost(customer)
-            for shop in shops_list
+            for shop in available_shops
         }
-        for shop, cost in trip_costs.items():
-            print(f"{customer.name}'s trip to the {shop.name} costs {cost}")
+
+        if not trip_costs:
+            print(
+                f"{customer.name} doesn't have enough money to make a purchase in any shop\n"
+            )
+            continue
+
         cheapest_shop = min(trip_costs, key=trip_costs.get)
         min_cost = trip_costs[cheapest_shop]
-        for key in customer.product_cart.keys():
-            if key in cheapest_shop.products:
-                continue
-            else:
-                print(f"{key} out of stock in {cheapest_shop.name}")
-                break
 
-        if min_cost < customer.money:
+        for shop, cost in trip_costs.items():
+            print(f"{customer.name}'s trip to the {shop.name} costs {cost:.2f}")
+
+        if min_cost <= customer.money:
             print(f"{customer.name} rides to {cheapest_shop.name}\n")
             home = customer.location
             customer.location = cheapest_shop.location
@@ -46,25 +52,23 @@ def shop_trip() -> None:
             print(f"Date: {date}")
             print(f"Thanks, {customer.name}, for your purchase!")
             print("You have bought:")
-            for key, value in customer.product_cart.items():
-                cost = cheapest_shop.products[key] * value
-                if str(cost).count(".0") > 0:
-                    cost = int(cost)
-                print(f"{value} {key}s for {cost} dollars")
-            print(
-                f"Total cost is "
-                f"{cheapest_shop.products_cost(customer)} dollars"
-            )
+            for product, quantity in customer.product_cart.items():
+                line_cost = cheapest_shop.products[product] * quantity
+                print(f"{quantity} {product}s for {line_cost:.2f} dollars")
+            total_cost = cheapest_shop.products_cost(customer)
+            print(f"Total cost is {total_cost:.2f} dollars")
             print("See you again!\n")
             print(f"{customer.name} rides home")
             customer.location = home
             customer.money = customer.money - min_cost
             print(
                 f"{customer.name} now has "
-                f"{customer.money} dollars\n"
+                f"{customer.money:.2f} dollars\n"
             )
         else:
             print(
                 f"{customer.name} doesn't have "
                 f"enough money to make a purchase in any shop"
             )
+
+shop_trip()
