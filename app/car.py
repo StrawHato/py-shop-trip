@@ -15,4 +15,4 @@ def distance_cost(customer: Customer, shop: Shop) -> float:
         + (customer.location[1] - shop.location[1]) ** 2
     )
     liters = customer.car["fuel_consumption"] / 100
-    return round((kilometers * liters * 2.4 * 2), 2)
+    return round((kilometers * liters * fuel_price * 2), 2)

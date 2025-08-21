@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 from app.customer import Customer, customers
 from app.shop import Shop, shops
 from app.car import distance_cost
@@ -31,11 +31,19 @@ def shop_trip() -> None:
             print(f"{customer.name}'s trip to the {shop.name} costs {cost}")
         cheapest_shop = min(trip_costs, key=trip_costs.get)
         min_cost = trip_costs[cheapest_shop]
+        for key in customer.product_cart.keys():
+            if key in cheapest_shop.products:
+                continue
+            else:
+                print(f"{key} out of stock in {cheapest_shop.name}")
+                break
 
         if min_cost < customer.money:
             print(f"{customer.name} rides to {cheapest_shop.name}\n")
-            date = datetime(2021, 1, 4, 12, 33, 41)
-            print(f"Date: {date.strftime("%d/%m/%Y %H:%M:%S")}")
+            home = customer.location
+            customer.location = cheapest_shop.location
+            date = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            print(f"Date: {date}")
             print(f"Thanks, {customer.name}, for your purchase!")
             print("You have bought:")
             for key, value in customer.product_cart.items():
@@ -49,9 +57,11 @@ def shop_trip() -> None:
             )
             print("See you again!\n")
             print(f"{customer.name} rides home")
+            customer.location = home
+            customer.money = customer.money - min_cost
             print(
                 f"{customer.name} now has "
-                f"{customer.money - min_cost} dollars\n"
+                f"{customer.money} dollars\n"
             )
         else:
             print(
